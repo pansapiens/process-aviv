@@ -232,7 +232,8 @@ class CD(Aviv):
 
     instrument_kwargs = [("num_residues",int,"required"),
                          ("molec_weight",float,"required"),
-                         ("protein_conc",float,"required")]
+                         ("protein_conc",float,"required"),
+                         ("path_length",float,"required")]
 
     def setupInstrumentExtraction(self,**kwargs):
         """
@@ -268,8 +269,9 @@ class CD(Aviv):
             self.num_residues = kwargs["num_residues"]
             self.molec_weight = kwargs["molec_weight"]
             self.protein_conc = kwargs["protein_conc"]
+            self.path_length = kwargs["path_length"]
         except KeyError:
-            err = "num_residues, molec_weight, and protein_conc keywords are "
+            err = "num_residues, molec_weight, protein_conc, and path_length keywords are "
             err += "required!"
             raise AvivError(err)
 

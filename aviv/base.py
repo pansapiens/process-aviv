@@ -227,7 +227,7 @@ class Channel:
 
  
 
-    def convertToMME(self,num_residues,molec_weight,initial_conc):
+    def convertToMME(self,num_residues,molec_weight,initial_conc,path_length):
         """
         Converts signal to Mean Molar Ellipticity.
 
@@ -236,7 +236,7 @@ class Channel:
 
         # Create list of MME corrections using concentrations and protein
         # information
-        MME_corr = (100.0*molec_weight)/(initial_conc*num_residues)
+        MME_corr = (100.0*molec_weight)/(path_length*initial_conc*num_residues)
 
         # Convert signal and error to MME
         len_data = len(self.y)
@@ -251,6 +251,7 @@ class Channel:
         out.append("  Initial concentration (ug/mL): %8.3F\n" % initial_conc)
         out.append("  Number of residues:            %8i\n" % num_residues)
         out.append("  Molecular weight (Da):         %8i\n" % molec_weight)
+        out.append("  Path length (cm):              %8.3F\n" % path_length)
 
         return "".join(out)
 

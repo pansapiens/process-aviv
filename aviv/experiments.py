@@ -111,7 +111,8 @@ class Titration:
             if self.instrument == "CD":
                 process_log.append(c.convertToMME(self.num_residues,
                                                   self.molec_weight,
-                                                  self.protein_conc))
+                                                  self.protein_conc,
+                                                  self.path_length))
                 process_log.append(c.normalizeSignal(invert=True))
             else:
                 process_log.append(c.normalizeSignal())
@@ -231,7 +232,8 @@ class pH:
             if self.instrument == "CD":
                 process_log.append(c.convertToMME(self.num_residues,
                                                   self.molec_weight,
-                                                  self.protein_conc))
+                                                  self.protein_conc,
+                                                  self.path_length))
                 process_log.append(c.normalizeSignal(invert=True))
             else:
                 process_log.append(c.normalizeSignal())
@@ -350,7 +352,8 @@ class Temperature:
             if self.instrument == "CD":
                 process_log.append(c.convertToMME(self.num_residues,
                                                   self.molec_weight,
-                                                  self.protein_conc))
+                                                  self.protein_conc,
+                                                  self.path_length))
                 process_log.append(c.normalizeSignal(invert=True))
             else:
                 process_log.append(c.normalizeSignal())
@@ -449,7 +452,8 @@ class Wavelength:
             process_log.append(c.subtractBlank(blank_file))
             process_log.append(c.convertToMME(self.num_residues,
                                               self.molec_weight,
-                                              self.protein_conc))
+                                              self.protein_conc,
+                                              self.path_length))
             process_log.append("\n")
 
         return "".join(process_log)       

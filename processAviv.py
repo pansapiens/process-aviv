@@ -291,6 +291,10 @@ class MainWindow:
                                            "label_text":"# residues:",
                                            "entry_default":143,
                                            "tag":"num_residues"}))
+            pane_objects.append((EntryBox,{"entry_type":float,
+                                           "label_text":"path (cm):",
+                                           "entry_default":1,
+                                           "tag":"path_length"}))
 
         elif self.tmp_exp.instrument == "ATF":
 
@@ -466,6 +470,8 @@ class MainWindow:
                                   self.channel_input["Sample"]["num_residues"]))
             self.to_parser.append(("molec_weight",
                                   self.channel_input["Sample"]["molec_weight"]))
+            self.to_parser.append(("path_length",
+                                  self.channel_input["Sample"]["path_length"]))
 
         if self.tmp_exp.exp_type == "Wavelength":
             self.to_parser.append(("blank_file",self.main_input["blank_file"]))
