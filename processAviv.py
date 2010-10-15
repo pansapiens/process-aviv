@@ -418,6 +418,8 @@ class MainWindow:
 
             self.main_input[tag] = self.__dict__[k].get()
 
+        print self.main_input
+        
         # Make sure that channel output is valid
         if not self.channels.isValid():
             err = "Invalid entry!"
@@ -459,7 +461,7 @@ class MainWindow:
                     pass
 
             self.channel_input[c] = dict(zip(tags[c],values[c]))
-       
+
         if self.tmp_exp.instrument == "ATF":
             self.to_parser.append(("qc_corr",self.main_input["qc_corr"]))
         
@@ -478,7 +480,8 @@ class MainWindow:
 
         # Use to_parser dictionary to parse the file
         self.to_parser = dict(self.to_parser)
-      
+        self.to_parser.update(self.main_input)     
+ 
         print self.to_parser
  
         try: 
