@@ -403,6 +403,7 @@ class OptionBox(SimpleTkObject):
         else:
             try:
                 self.option_entry.destroy()
+                del self.option_entry  # @@VK 2010.11.17
             except AttributeError:
                 pass
 
