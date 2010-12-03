@@ -13,7 +13,10 @@ import sys, os
 # Import Tk modules
 try:
     from Tkinter import *
-    import FileDialog, tkMessageBox, Dialog
+
+    # @@VK 2010.12.03
+    #import FileDialog,
+    import tkMessageBox, Dialog, tkFileDialog
 except ImportError:
     print "TK required!"
     sys.exit()
@@ -95,8 +98,13 @@ class MainWindow:
         """
 
         # Use LoadFileDialog to let user select file
-        d = FileDialog.LoadFileDialog(self.parent)
-        self.input_file = d.go(".","*.dat")
+
+        # @@VK 2010.12.03
+        #d = FileDialog.LoadFileDialog(self.parent)
+        #self.input_file = d.go(".","*.dat")
+        self.input_file = \
+            tkFileDialog.askopenfilename(filetypes=[("Data Files","*.dat"),\
+                                                    ("All Files","*.*")])
         if self.input_file != None:
             self.loadFile()
 
@@ -130,8 +138,12 @@ class MainWindow:
         """
         """
 
-        d = FileDialog.LoadFileDialog(self.parent)
-        blank_file = d.go(".","*.dat")
+        # @@VK 2010.12.03
+        #d = FileDialog.LoadFileDialog(self.parent)
+        #blank_file = d.go(".","*.dat")
+        blank_file = \
+            tkFileDialog.askopenfilename(filetypes=[("Data Files","*.dat"),\
+                                                    ("All Files","*.*")])
         if blank_file != None:
             self.blank_entry.entry.delete(0,END)
             self.blank_entry.entry.insert(0,blank_file)
@@ -417,8 +429,6 @@ class MainWindow:
                 return 1
 
             self.main_input[tag] = self.__dict__[k].get()
-
-        print self.main_input
         
         # Make sure that channel output is valid
         if not self.channels.isValid():
@@ -638,8 +648,13 @@ class MainWindow:
         """
         
         # Use SaveFileDialog to let user select file
-        d = FileDialog.SaveFileDialog(self.parent)
-        self.output_file = d.go(key="test")
+
+        # @@VK 2010.12.03
+        #d = FileDialog.SaveFileDialog(self.parent)
+        #self.output_file = d.go(key="test")
+        self.output_file = tkFileDialog.asksaveasfilename(\
+                            filetypes=[("Data files","*.dat"),\
+                                       ("All Files",".*")])
 
         # Save file
         f = open(self.output_file,'w')
