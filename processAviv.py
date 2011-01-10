@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 __author__ = "Michael J. Harms"
-__date__ = "070614"
+__date__ = "110110"
+__version__= "0.2"
 __description__ = \
 """
 A Tkinterface that allows users to fit Aviv experimental data in an intuitive
@@ -13,9 +14,6 @@ import sys, os
 # Import Tk modules
 try:
     from Tkinter import *
-
-    # @@VK 2010.12.03
-    #import FileDialog,
     import tkMessageBox, Dialog, tkFileDialog
 except ImportError:
     print "TK required!"
@@ -66,7 +64,7 @@ class MainWindow:
 
         # Initialize window
         self.parent = parent
-        self.parent.title("Process Aviv experiment file")
+        self.parent.title("Process Aviv experiment file. (v%s)"%__version__)
 
         # Add "File" menu
         menu_bar = Menu(self.parent)
@@ -83,13 +81,14 @@ class MainWindow:
         self.start_label = Label(self.frame,text=start_text)
         self.start_label.grid()
 
+        self.initialdir = "" # Initial directory
+        
         # If a file is specified on the command line, try to open it
         try:
             self.input_file = sys.argv[1]
             self.loadFile()
         except IndexError:
             pass
-
 
     def loadFileDialog(self):
         """
@@ -98,14 +97,12 @@ class MainWindow:
         """
 
         # Use LoadFileDialog to let user select file
-
-        # @@VK 2010.12.03
-        #d = FileDialog.LoadFileDialog(self.parent)
-        #self.input_file = d.go(".","*.dat")
         self.input_file = \
             tkFileDialog.askopenfilename(filetypes=[("Data Files","*.dat"),\
-                                                    ("All Files","*.*")])
-        if self.input_file != None:
+                                                    ("All Files","*.*")],\
+                                         initialdir = self.initialdir)
+
+        if self.input_file != None and self.input_file != "":
             self.loadFile()
 
     def loadFile(self):
@@ -124,7 +121,10 @@ class MainWindow:
 
             tkMessageBox.showerror(title="File does not exist!",message=err)
 
-
+        # Save the directory, so next time we are opening or saving a file,
+        # we start in the same directory
+        self.initialdir = os.path.dirname(self.input_file)
+        
         # Create an instance of AvivExp based on contents of input file
         try:
             self.tmp_exp = preParse(self.input_file)
@@ -137,14 +137,11 @@ class MainWindow:
     def loadBlankFile(self):
         """
         """
-
-        # @@VK 2010.12.03
-        #d = FileDialog.LoadFileDialog(self.parent)
-        #blank_file = d.go(".","*.dat")
         blank_file = \
             tkFileDialog.askopenfilename(filetypes=[("Data Files","*.dat"),\
-                                                    ("All Files","*.*")])
-        if blank_file != None:
+                                                    ("All Files","*.*")],\
+                                         initialdir = self.initialdir)
+        if blank_file != None and blank_file != "":
             self.blank_entry.entry.delete(0,END)
             self.blank_entry.entry.insert(0,blank_file)
             self.blank_entry._checkObject()
@@ -157,7 +154,7 @@ class MainWindow:
         """
 
         # Clear form
-        keep_obj = ["input_file","tmp_exp","parent"]
+        keep_obj = ["input_file","tmp_exp","parent","initialdir"]
         to_destroy = [k for k in self.__dict__.keys() if k not in keep_obj]
         for k in to_destroy:
             obj = self.__dict__.pop(k)
@@ -647,14 +644,14 @@ class MainWindow:
         Save output to file using SaveFileDialog.
         """
         
-        # Use SaveFileDialog to let user select file
-
-        # @@VK 2010.12.03
-        #d = FileDialog.SaveFileDialog(self.parent)
-        #self.output_file = d.go(key="test")
+        # Use tkFileDialog to let user select file
         self.output_file = tkFileDialog.asksaveasfilename(\
                             filetypes=[("Data files","*.dat"),\
-                                       ("All Files",".*")])
+                                       ("All Files",".*")],
+                            initialdir = self.initialdir)
+        
+        if self.output_file in ("",None):
+            return
 
         # Save file
         f = open(self.output_file,'w')
