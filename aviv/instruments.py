@@ -4,6 +4,7 @@ __date__ = ""
 
 import os, sys
 from base import *
+from math import sqrt
 
 # A dictionary of alternate column names for when Aviv changes the names of 
 # their data columns randomly.
@@ -95,62 +96,120 @@ class Aviv:
         # Create attributes in which to store data from columns
         columns_to_extract = self.data_extract.keys()
 
-        # Find start and end of data
+        # Find how many data blocks there are and make a list for the starts and ends
         try:
-            start = self.file_keys.index("$MDCDA") + 2
-            end = self.file_keys.index("$ENDDA")
-            data = self.file_contents[start:end]
-        except IndexError:
-            err = "Problem locating data in file!"
-            raise AvivError(err)
-
-        # Grab name of each column in the file
-        columns_in_file = self.file_contents[start-1].split()
-        column_indexes = dict([(x,i) for i, x in enumerate(columns_in_file)])
-
-        # Look for columns that are supposed to be extracted but aren't found
-        for k in columns_to_extract:
-
-            # If the specified column is missing, try to find another name for
-            # it in ALTERNATE_COLUMN_KEYS
-            if k not in columns_in_file:
-
-                # See if there is another global name for this column
-                try:
-                    new_key = ALTERNATE_COLUMN_KEYS[k]
-                except KeyError:
-                    continue
-
-                # If the alternate name for the column is found in the file,
-                # rename the key in self.data_extract
-                if new_key in columns_in_file:
-                    self.data_extract[new_key] = self.data_extract.pop(k)
-                    columns_to_extract.remove(k)
-                    columns_to_extract.append(new_key)
-
-
-        # Create attributes of self for each data column to be extracted
-        self.__dict__.update([(self.data_extract[c],[])
-                              for c in columns_to_extract])
-        
-        # Extract columns specified in self.data_extract.keys to attributes
-        # in self.data_extract.values
-        for line in data:
-            column = line.split()
+            startl = [i for i,x in enumerate(self.file_keys) if x == "$MDCDA"]
             
-            for c in columns_to_extract:
-                try:
-                    attribute = self.data_extract[c]
-                    index = column_indexes[c]
-                    value = float(column[index])
-                    self.__dict__[attribute].append(value)
-                except KeyError:
-                    print "Warning! Column \"%s\" not found!" % c
-                    #raise AvivError(err)
-                except ValueError:
-                    err = "Problem with \"%s\" column on line:\n%s" % (c,line)
-                    raise AvivError(err)
+            # The $ENDDATA key appears at the end of the entire data set.  When
+            # multiple data blocks are present, they are delimited by the start
+            # of the next block ($MDCNAME), or in the case of the last block by
+            # $ENDDATA.  Since the first block also contains $MDCNAME, we need
+            # to remove it with a pop()
+            endl = [i for i,x in enumerate(self.file_keys) if x in ("$ENDDA","$MDCNA")]
+            endl.pop(0)
+        except IndexError:
+            err = "Problem finding data blocks in file!"
+            raise AvivError(err)
+        
+        # If we have many data starts that means we have more than one set in the
+        # data file.
+        if len(startl) > 0: mult_datasets = True
+        else: mult_datasets = False
 
+        # A local functions to determine averages
+        def mean(numberList):
+            """ Average of the numbers """
+            floatNums = [float(x) for x in numberList]
+            return sum(floatNums) / len(numberList)
+        
+        def avg_error(numberList):
+            """ Sqrt of the sum of the squares """
+            floatNumsSquared = [pow(float(x),2) for x in numberList]
+            return sqrt(sum(floatNumsSquared))
+        
+        first_pass = True
+            
+        # Loop through start/ends for all of the data blocks
+        for start, end, ctr in zip(startl, endl, range(len(startl))):
+        
+            # Find start and end of data
+            try:
+                start = start+2
+                data = self.file_contents[start:end]
+            except IndexError:
+                err = "Problem locating data in file!"
+                raise AvivError(err)
+            
+            # Get column names on the first pass
+            if first_pass:
+                
+                first_pass = False
+                
+                # Grab name of each column in the file
+                columns_in_file = self.file_contents[start-1].split()
+                column_indexes = dict([(x,i) for i, x in enumerate(columns_in_file)])
+        
+                # Look for columns that are supposed to be extracted but aren't found
+                for k in columns_to_extract:
+        
+                    # If the specified column is missing, try to find another name for
+                    # it in ALTERNATE_COLUMN_KEYS
+                    if k not in columns_in_file:
+        
+                        # See if there is another global name for this column
+                        try:
+                            new_key = ALTERNATE_COLUMN_KEYS[k]
+                        except KeyError:
+                            continue
+        
+                        # If the alternate name for the column is found in the file,
+                        # rename the key in self.data_extract
+                        if new_key in columns_in_file:
+                            self.data_extract[new_key] = self.data_extract.pop(k)
+                            columns_to_extract.remove(k)
+                            columns_to_extract.append(new_key)
+                            
+                # Create attributes of self for each data column to be extracted.  Create
+                # empty ones for the normal numbers and for the averages
+                self.__dict__.update([(self.data_extract[c],[]) for c in columns_to_extract])
+                self.__dict__.update([(self.data_extract[c]+'_avg',[]) for c in columns_to_extract])
+                    
+                # The _avg attributes will hold a list of that attribute for each data block
+                for c in columns_to_extract:
+                    for i in range(len(startl)):
+                        self.__dict__[self.data_extract[c]+'_avg'].append([])
+                        
+            # Extract columns specified in self.data_extract.keys to attributes
+            # in self.data_extract.values
+            for line in data:
+                column = line.split()
+                for c in columns_to_extract:
+                    try:
+                        # Fill the _avg lists
+                        attribute = self.data_extract[c]+'_avg'
+                        index = column_indexes[c]
+                        value = float(column[index])
+                        self.__dict__[attribute][ctr].append(value)
+                    except KeyError:
+                        print "Warning! Column \"%s\" not found!" % c
+                        #raise AvivError(err)
+                    except ValueError:
+                        err = "Problem with \"%s\" column on line:\n%s" % (c,line)
+                        raise AvivError(err)
+                    
+        # Average the data and save it in the regular attribute
+        for c in columns_to_extract:
+            attribute = self.data_extract[c]
+            for i in range(len(self.__dict__[attribute+'_avg'][0])):
+                avg_l = []
+                for ctr in range(len(startl)):    
+                    avg_l.append(self.__dict__[attribute+'_avg'][ctr][i])
+                
+                # Make a guess that something is an error and treat it as such
+                if "ERR" in self.data_extract[c].upper():
+                    self.__dict__[attribute].append(avg_error(avg_l))
+                else:
+                    self.__dict__[attribute].append(mean(avg_l))                        
 
     def extractConfiguration(self):
         """

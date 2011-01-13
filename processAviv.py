@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 __author__ = "Michael J. Harms"
-__date__ = "110110"
-__version__= "0.2"
+__date__ = "110113"
+__version__= "0.3"
 __description__ = \
 """
 A Tkinterface that allows users to fit Aviv experimental data in an intuitive
