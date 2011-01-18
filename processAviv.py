@@ -24,31 +24,40 @@ from tkModule import *
 import aviv, denaturantModule 
 from aviv.parsers import *
 
-BUFFER_OPTIONS = ["K Acetate",
+BUFFER_OPTIONS = ["Tris",
+                  "K Acetate",
                   "Na Acetate",
                   "MES",
                   "HEPES",
                   "TAPS",
                   "CHES",
                   "CAPS",
-                  "MOPS",
-                  "Tris"]
+                  "MOPS"]
 
 SALT_OPTIONS = ["KCl",
-                "NaCl"]
+                "NaCl",
+                "K2SO4",
+                "Na2SO4",
+                "(NH4)2SO4"]
 
 PROTEIN_OPTIONS = ["D+PHS",
                    "PHS",
                    "NVIAGA",
+                   "D+NVIAGLA",
+                   "D+VIAGLA",
                    "D+PHSt",
                    "WT"]
 
 TITRANT_OPTIONS = ["GdmHCl",
-                   "Urea"]
+                   "Urea",
+                   "Sucrose",
+                   "(NH4)2SO4",
+                   "K2SO4",
+                   "None"]
 
-PHTITR_OPTIONS = ["KOH",
+PHTITR_OPTIONS = ["HCl",
                   "NaOH",
-                  "HCl"]
+                  "KOH"]
 
 DENAT_ERR_CUTOFF = 0.05
 
